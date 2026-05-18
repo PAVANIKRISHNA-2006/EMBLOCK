@@ -1,0 +1,8 @@
+{
+  "name": "Emblock",
+  "description": "Internal knowledge base and collaboration workspace for high-performance teams.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

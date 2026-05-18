@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitives
+    function isSignedIn() { return request.auth != null; }
+    function isEmailVerified() { return request.auth.token.email_verified == true; }
+    function isAdmin() { 
+      return isSignedIn() && (
+        (request.auth.token.email == "raokpavani@gmail.com" && isEmailVerified()) || 
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+
+    // Validation Blueprints
+    function isValidDocument(data) {
+      return data.keys().hasAll(['title', 'type', 'authorId']) &&
+             data.title is string && data.title.size() <= 200 &&
+             data.type in ['dept', 'rule', 'report', 'shared'] &&
+             data.authorId == request.auth.uid;
+    }
+
+    function isValidUser(data) {
+      return data.email is string && data.email.size() <= 100;
+    }
+
+    // User Profiles
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if (isOwner(userId) || isAdmin()) && isValidUser(incoming());
+    }
+
+    // Knowledge Documents
+    match /documents/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidDocument(incoming());
+      allow update: if (isAdmin() || (isSignedIn() && existing().authorId == request.auth.uid)) && isValidDocument(incoming());
+      allow delete: if isAdmin() || (isSignedIn() && existing().authorId == request.auth.uid);
+    }
+
+    // Projects
+    match /projects/{projectId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    // AI Usage Stats
+    match /usage/{usageId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+    }
+  }
+}

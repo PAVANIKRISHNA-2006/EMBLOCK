@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "document": {
+      "title": "Document",
+      "description": "A knowledge base document or report",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "type": { "type": "string", "enum": ["dept", "rule", "report", "shared"] },
+        "department": { "type": "string" },
+        "authorId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "type", "authorId"]
+    },
+    "project": {
+      "title": "Project",
+      "description": "A company project",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "progress": { "type": "number" },
+        "status": { "type": "string" },
+        "members": { "type": "array" }
+      },
+      "required": ["name", "progress", "status"]
+    },
+    "userProfile": {
+      "title": "User Profile",
+      "description": "Employee profile information",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "department": { "type": "string" },
+        "workspaceLink": { "type": "string" }
+      },
+      "required": ["email"]
+    },
+    "khubUsage": {
+      "title": "K-Hub Usage",
+      "description": "Tracking AI core usage",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "tokens": { "type": "number" },
+        "mentions": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "documents": { "schema": "document", "description": "Collection of knowledge documents" },
+    "projects": { "schema": "project", "description": "Collection of active projects" },
+    "users": { "schema": "userProfile", "description": "Collection of employee profiles" },
+    "usage": { "schema": "khubUsage", "description": "Collection of usage statistics" }
+  }
+}
